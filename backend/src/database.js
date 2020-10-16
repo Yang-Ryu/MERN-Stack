@@ -13,5 +13,5 @@ mongoose.connect(URI, {
 const connection = mongoose.connection;
 
 connection.once('open', ()=> {
-	console.log('AJSDSDAS DB SPEAKS');
+	console.log('Database connection established');
 });
