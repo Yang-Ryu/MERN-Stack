@@ -60,7 +60,7 @@ export default class CreateNote extends Component {
                                     />
                     </div>
 
-                    /** Para la descripcion de la tarea */
+                    
                     <div className="form-group">
                         <textarea 
                            name="content"
