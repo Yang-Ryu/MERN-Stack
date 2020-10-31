@@ -15,8 +15,8 @@ export default class CreateUser extends Component {
     }
 
     getUsers = async () => {
-        const response = await axios.get('http://localhost:4000/api/users');
-        this.setState({users: response.data});
+        const res = await axios.get('http://localhost:4000/api/users');
+        this.setState({users: res.data});
     }
 
     //e = objeto que recibe la funcion
