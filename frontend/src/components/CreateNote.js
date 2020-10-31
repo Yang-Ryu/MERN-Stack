@@ -1,32 +1,77 @@
 import React, { Component } from 'react'
 import axios from 'axios'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 export default class CreateNote extends Component {
 
     state= {
         users: [],
-        userSelected: ''
+        userSelected: '',
+        title: '',
+        content: '',
+        date: new Date(),
+        editing: false,
+        _id: ''
     }
 
     async componentDidMount()
     {
-        const res = await axios.get('http://localhost/:4000/api/users');
-        this.setState({users: res.data.map(user => user.username)});
-    }
+        
+        const res = await axios.get('http://localhost:4000/api/users');
+        this.setState({
+            users: res.data.map(user => user.username),
+            userSelected: res.data[0].username
+        })
+        if(this.props.match.params.id)
+        {
+            const res = await axios.get('http://localhost:4000/api/notes/'+ this.props.match.params.id);
+            this.setState({
+                title: res.data.title,
+                content: res.data.content,
+                date: new Date(res.data.date),
+                userSelected: res.data.author,
+                editing: true,
+                _id: this.props.match.params.id
+            })
+        }
+    } 
     
     //Metodo onSubmit del componente createnote
-    onSubmit = (e) => {
-        
+    onSubmit = async (e) => {
         e.preventDefault();  //Prever la pagina se reinicie al actualizarse.
+
+        const newNote = {
+            title: this.state.title,
+            content: this.state.content,
+            date: this.state.date,
+            author: this.state.userSelected
+        };
+
+        if(this.state.editing)
+        {
+
+            await axios.put('http://localhost:4000/api/notes/' + this.state._id, newNote); //PUT para actualizar la nota
+        }else { 
+            await axios.post('http://localhost:4000/api/notes', newNote); //POST para crear nueva nota
+        }
+
+        window.location.href = '/'; //Redireccionar a la pagina de notas luego de crear una nota
 
 
     }
     
-    onInputChange = e => 
-    {
+    onInputChange = e => {         
         this.setState({
-            userSelected: e.target.value
+          [e.target.name]: e.target.value 
         })
+    }
+
+    onChangeDate = date => 
+    {
+       this.setState({
+           date
+        });    
     }
 
     render() {
@@ -40,6 +85,7 @@ export default class CreateNote extends Component {
                             <select className="form-control"
                                     name="userSelected"
                                     onChange={this.onInputChange}
+                                    value={this.state.userSelected}
                             >
                                 {
 
@@ -56,6 +102,8 @@ export default class CreateNote extends Component {
                                     className="form-control" 
                                     placeholder="Title" 
                                     name="title"
+                                    onChange={this.onInputChange}
+                                    value= {this.state.title}
                                     required
                                     />
                     </div>
@@ -66,12 +114,24 @@ export default class CreateNote extends Component {
                            name="content"
                            className="form-control"
                            placeholder="Content"
+                           onChange={this.onInputChange}
+                           value= {this.state.content} 
                            required>
-
+                        
                            </textarea>
-                    </div>            
+                    </div>   
 
-                   <form action={this.onSubmit}>
+                        <div className="form-group">
+                            <DatePicker
+                            className="form-control"
+                            selected={this.state.date}
+                            onChange={this.onChangeDate}
+
+                            />
+                            </div>     
+
+                   <form onSubmit={this.onSubmit}>
+                       
                        <button type="submit" className="btn btn-primary">
                            Save
 
